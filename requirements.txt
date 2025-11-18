@@ -1,5 +1,5 @@
 # ---- Core ML Stack ----
-tensorflow==2.13.0
+tensorflow==2.20.0rc0
 numpy==1.24.3
 protobuf==3.20.3
 
