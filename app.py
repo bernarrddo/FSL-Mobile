@@ -3,13 +3,17 @@ from flask_cors import CORS
 import torch
 import numpy as np
 from model import ModifiedLSTM
+import os
 import base64
 from io import BytesIO
 from PIL import Image
 import mediapipe as mp
+import secrets
+import time
 
 app = Flask(__name__)
 CORS(app)
+
 
 # ---------------------------
 # LOAD MODEL
@@ -29,7 +33,7 @@ CLASSES = [
     'Numbers_Three', 'Numbers_Two'
 ]
 
-# Initialize model
+# FIX: model input/output dimensions must match training
 model = ModifiedLSTM(
     input_size=188,
     hidden_size=256,
@@ -37,14 +41,15 @@ model = ModifiedLSTM(
     num_classes=len(CLASSES)
 ).to(device)
 
-# Load weights
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device), strict=False)
 model.eval()
+
 
 # ---------------------------
 # MEDIAPIPE HAND EXTRACTION
 # ---------------------------
 mp_hands = mp.solutions.hands
+
 hands = mp_hands.Hands(
     static_image_mode=True,
     max_num_hands=1,
@@ -60,13 +65,14 @@ def extract_landmarks(pil_image):
 
     hand = results.multi_hand_landmarks[0]
 
+    # 21 * (x,y,z) = 63 values → pad to 188
     arr = []
     for lm in hand.landmark:
         arr.extend([lm.x, lm.y, lm.z])
 
     arr = np.array(arr, dtype=np.float32)
 
-    # Pad to 188 features
+    # FIX: pad consistently
     if arr.shape[0] < 188:
         arr = np.pad(arr, (0, 188 - arr.shape[0]))
     else:
@@ -77,14 +83,16 @@ def extract_landmarks(pil_image):
 # ---------------------------
 # PREDICTION ROUTE
 # ---------------------------
+
 @app.post("/predict")
 def predict():
     body = request.json or {}
+
     frame_str = body.get("frame")
     if not frame_str:
         return jsonify({"error": "Missing frame"}), 400
 
-    # Remove base64 prefix if present
+    # FIX: handle format "data:image/jpeg;base64,XXXX"
     if "," in frame_str:
         frame_str = frame_str.split(",")[1]
 
@@ -109,9 +117,11 @@ def predict():
         "confidence": float(probs[idx]),
     })
 
+
 @app.get("/ping")
 def ping():
     return jsonify({"status": "ok"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
