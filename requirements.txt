@@ -1,20 +1,13 @@
-# ---- Core ML Stack ----
-tensorflow==2.20.0rc0
-numpy==1.24.3
-protobuf==3.20.3
+Flask==2.3.3
+flask-cors==3.1.1
 
-# ---- MediaPipe (Hand Landmarks) ----
-mediapipe==0.10.5
+# PyTorch CPU build (smallest & works on Render)
+torch==2.2.0
+torchvision==0.17.0
+torchaudio==2.2.0
 
-# ---- Backend / API ----
-flask==2.3.2
-flask-cors==4.0.0
-gunicorn==20.1.0
+numpy==1.26.4
+Pillow==10.0.1
 
-# ---- Utilities ----
-opencv-python==4.8.1.78
-Werkzeug==2.3.7
-requests==2.31.0
-
-# ---- Optional (safe) ----
-python-dotenv==1.0.0
+# Mediapipe BEFORE Python 3.12 ONLY
+mediapipe==0.10.11
