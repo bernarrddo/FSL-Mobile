@@ -1,13 +1,10 @@
 Flask==2.3.3
-flask-cors==3.1.1
+flask-cors==3.0.10
 
-# PyTorch CPU build (smallest & works on Render)
 torch==2.2.0
 torchvision==0.17.0
 torchaudio==2.2.0
 
 numpy==1.26.4
 Pillow==10.0.1
-
-# Mediapipe BEFORE Python 3.12 ONLY
 mediapipe==0.10.11
